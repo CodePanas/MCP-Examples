@@ -1,0 +1,37 @@
+# Global ignores
+.DS_Store
+Thumbs.db
+*.log
+*.swp
+*.swo
+
+# Python ignores
+weather-python/venv/
+weather-python/__pycache__/
+weather-python/**/*.pyc
+weather-python/.env
+weather-python/.pytest_cache/
+weather-python/.mypy_cache/
+weather-python/.vscode/
+
+# Node/TypeScript ignores
+weather-ts/node_modules/
+weather-ts/dist/
+weather-ts/.env
+weather-ts/.next/
+weather-ts/.turbo/
+weather-ts/.vscode/
+weather-ts/.DS_Store
+weather-ts/coverage/
+
+ai-chat-frontend/node_modules/
+ai-chat-frontend/build/
+ai-chat-frontend/.env
+ai-chat-frontend/.vscode/
+ai-chat-frontend/.DS_Store
+ai-chat-frontend/coverage/
+
+# Editor/project files
+.idea/
+.vscode/
+*.iml
