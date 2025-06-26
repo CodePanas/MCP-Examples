@@ -31,8 +31,8 @@ const Chat: React.FC = () => {
     setInput("");
     setLoading(true);
     try {
-      // Replace this URL with your backend endpoint
-      const response = await fetch("/api/ask", {
+      // Update URL to point to the correct backend port
+      const response = await fetch("http://localhost:8005/api/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: userMessage.text }),
