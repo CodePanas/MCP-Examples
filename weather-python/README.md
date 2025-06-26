@@ -114,4 +114,4 @@ All configuration is centralized in `app/config.py`:
 - [ ] Implement conversation history
 - [ ] Add user authentication
 - [ ] Support for multiple AI models
-- [ ] Real-time chat with WebSockets
+- [ ] Response <500 ms
