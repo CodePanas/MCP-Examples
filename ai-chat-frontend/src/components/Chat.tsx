@@ -8,13 +8,18 @@ import {
   CircularProgress,
   useTheme,
 } from "@mui/material";
+import ReactMarkdown from "react-markdown";
+import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface Message {
   sender: "user" | "bot";
   text: string;
 }
 
-const CHAT_BOX_WIDTH = 400;
+const CHAT_BOX_WIDTH = "50vw";
 const CHAT_BOX_HEIGHT = "95vh";
 
 const Chat: React.FC = () => {
@@ -40,7 +45,7 @@ const Chat: React.FC = () => {
       const data = await response.json();
       setMessages((prev) => [
         ...prev,
-        { sender: "bot", text: data.answer || "No response from AI." },
+        { sender: "bot", text: JSON.stringify(data) },
       ]);
     } catch (err) {
       setMessages((prev) => [
@@ -121,9 +126,195 @@ const Chat: React.FC = () => {
                   borderTopLeftRadius: msg.sender === "user" ? 12 : 0,
                 }}
               >
-                <Typography variant="body1" sx={{ wordBreak: "break-word" }}>
-                  {msg.text}
-                </Typography>
+                {msg.sender === "bot" &&
+                  (() => {
+                    let parsed: any = null;
+                    try {
+                      parsed =
+                        typeof msg.text === "string"
+                          ? JSON.parse(msg.text)
+                          : null;
+                    } catch {
+                      parsed = null;
+                    }
+                    if (parsed && parsed.calls && Array.isArray(parsed.calls)) {
+                      return (
+                        <>
+                          {parsed.calls.map((call: any, i: number) => (
+                            <Box key={i} sx={{ mb: 1 }}>
+                              <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+                                Call {i + 1}
+                              </Typography>
+                              {call.payload && (
+                                <Accordion
+                                  sx={{
+                                    bgcolor: "transparent",
+                                    boxShadow: "none",
+                                  }}
+                                >
+                                  <AccordionSummary
+                                    expandIcon={<ExpandMoreIcon />}
+                                  >
+                                    <Typography variant="subtitle2">
+                                      Payload
+                                    </Typography>
+                                  </AccordionSummary>
+                                  <AccordionDetails>
+                                    <SyntaxHighlighter
+                                      language="json"
+                                      style={materialDark}
+                                      wrapLongLines
+                                    >
+                                      {JSON.stringify(call.payload, null, 2)}
+                                    </SyntaxHighlighter>
+                                  </AccordionDetails>
+                                </Accordion>
+                              )}
+                              {call.response && (
+                                <Accordion
+                                  sx={{
+                                    bgcolor: "transparent",
+                                    boxShadow: "none",
+                                  }}
+                                >
+                                  <AccordionSummary
+                                    expandIcon={<ExpandMoreIcon />}
+                                  >
+                                    <Typography variant="subtitle2">
+                                      Response
+                                    </Typography>
+                                  </AccordionSummary>
+                                  <AccordionDetails>
+                                    <SyntaxHighlighter
+                                      language="json"
+                                      style={materialDark}
+                                      wrapLongLines
+                                    >
+                                      {JSON.stringify(call.response, null, 2)}
+                                    </SyntaxHighlighter>
+                                  </AccordionDetails>
+                                </Accordion>
+                              )}
+                            </Box>
+                          ))}
+                          {parsed.answer && (
+                            <Box
+                              sx={{
+                                mt: 1.5,
+                                p: 2,
+                                bgcolor: "#23272f",
+                                borderRadius: 2,
+                                fontSize: 15,
+                                color: theme.palette.text.primary,
+                                boxShadow: 1,
+                                lineHeight: 1.7,
+                                wordBreak: "break-word",
+                              }}
+                            >
+                              <ReactMarkdown
+                                components={{
+                                  p: ({ node, ...props }) => (
+                                    <Typography
+                                      variant="body2"
+                                      sx={{ mb: 1, fontSize: 15 }}
+                                      {...props}
+                                    />
+                                  ),
+                                  li: ({ node, ...props }) => (
+                                    <li
+                                      style={{ marginLeft: 16, fontSize: 15 }}
+                                    >
+                                      {props.children}
+                                    </li>
+                                  ),
+                                  a: ({ node, ...props }) => (
+                                    <a
+                                      style={{
+                                        color: theme.palette.primary.light,
+                                        textDecoration: "underline",
+                                      }}
+                                      {...props}
+                                    />
+                                  ),
+                                  code: ({ node, ...props }) => (
+                                    <code
+                                      style={{
+                                        background: "#181c23",
+                                        borderRadius: 4,
+                                        padding: "2px 6px",
+                                        fontSize: 14,
+                                      }}
+                                    >
+                                      {props.children}
+                                    </code>
+                                  ),
+                                }}
+                              >
+                                {parsed.answer}
+                              </ReactMarkdown>
+                            </Box>
+                          )}
+                        </>
+                      );
+                    }
+                    if (
+                      parsed &&
+                      (parsed.answer || parsed.payload || parsed.data)
+                    ) {
+                      return (
+                        <>
+                          {parsed.payload && (
+                            <Accordion
+                              sx={{ bgcolor: "transparent", boxShadow: "none" }}
+                            >
+                              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                <Typography variant="subtitle2">
+                                  Payload
+                                </Typography>
+                              </AccordionSummary>
+                              <AccordionDetails>
+                                <SyntaxHighlighter
+                                  language="json"
+                                  style={materialDark}
+                                  wrapLongLines
+                                >
+                                  {JSON.stringify(parsed.payload, null, 2)}
+                                </SyntaxHighlighter>
+                              </AccordionDetails>
+                            </Accordion>
+                          )}
+                          {parsed.data && (
+                            <Accordion
+                              sx={{ bgcolor: "transparent", boxShadow: "none" }}
+                            >
+                              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                <Typography variant="subtitle2">
+                                  Data
+                                </Typography>
+                              </AccordionSummary>
+                              <AccordionDetails>
+                                <SyntaxHighlighter
+                                  language="json"
+                                  style={materialDark}
+                                  wrapLongLines
+                                >
+                                  {JSON.stringify(parsed.data, null, 2)}
+                                </SyntaxHighlighter>
+                              </AccordionDetails>
+                            </Accordion>
+                          )}
+                          {parsed.answer && (
+                            <ReactMarkdown>{parsed.answer}</ReactMarkdown>
+                          )}
+                        </>
+                      );
+                    }
+                    // fallback: solo markdown
+                    return <ReactMarkdown>{msg.text}</ReactMarkdown>;
+                  })()}
+                {msg.sender === "user" && (
+                  <ReactMarkdown>{msg.text}</ReactMarkdown>
+                )}
               </Paper>
             </Box>
           ))}
